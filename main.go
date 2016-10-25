@@ -9,18 +9,20 @@ import (
 )
 
 var dir *string = flag.String("dir", ".", "directory for files.")
-var port *int = flag.Int("port", 8080, "Port to listen for requests on.")
+var port *int = flag.Int("port", 8080, "listening port")
+var host *string = flag.String("host", "localhost", "listening host")
 
-func tryToLaunch(port int) {
+func tryToLaunch(host string, port int) {
 	if port > 8090 {
 		fmt.Println("tried more than 10 ports, giving up!")
 		return
 	}
-	fmt.Printf("listening on http://localhost:%d\n", port)
-	err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
+	h := fmt.Sprintf("%s:%d", host, port)
+	fmt.Printf("listening on http://%s\n", h)
+	err := http.ListenAndServe(h, nil)
 	if err != nil {
 		fmt.Println(err)
-		tryToLaunch(port + 1)
+		tryToLaunch(host, port+1)
 	}
 }
 
@@ -36,5 +38,5 @@ func main() {
 	p := path.Join(wd, *dir)
 
 	http.Handle("/", http.FileServer(http.Dir(p)))
-	tryToLaunch(*port)
+	tryToLaunch(*host, *port)
 }
